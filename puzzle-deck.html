@@ -230,6 +230,12 @@
     font-size: 0.9rem;
     font-variant-numeric: tabular-nums;
   }
+  .stat.best {
+    background: var(--tint);
+    color: var(--tint-ink);
+    border-color: var(--tint);
+    font-weight: 700;
+  }
   .panel {
     background: var(--surface);
     border: 1px solid var(--line);
@@ -469,6 +475,7 @@
         <div class="g1-side">
           <div class="ctrl-row">
             <div class="stat" id="g1sum">Sum: 0</div>
+            <div class="stat best" id="g1best" style="display:none">★ Best possible</div>
           </div>
           <div>
             <div class="picker-label" style="margin-bottom:6px">Shape</div>
@@ -486,6 +493,7 @@
           </div>
           <p style="color:var(--ink-soft);font-size:0.85rem;line-height:1.5;margin:0">
             Click a cell to drop the shape there, or use the arrows. <kbd>R</kbd> rotates, arrow keys move.
+            A "Best possible" badge lights up the moment your current placement can't be beaten.
           </p>
           <div class="banner win" id="g1banner"></div>
         </div>
@@ -624,6 +632,7 @@ function g1SelectShape(key){
   g1.anchorR = 0;
   g1.anchorC = 0;
   g1.locked = false;
+  g1.optimalValue = g1Optimal();
   document.getElementById('g1banner').classList.remove('show');
   document.getElementById('g1lock').disabled = false;
   g1RenderShapePicker();
@@ -660,6 +669,7 @@ function g1New(){
   g1.anchorR = 0;
   g1.anchorC = 0;
   g1.locked = false;
+  g1.optimalValue = g1Optimal();
   document.getElementById('g1banner').classList.remove('show');
   document.getElementById('g1lock').disabled = false;
   g1RenderShapePicker();
@@ -707,7 +717,9 @@ function g1Render(){
       el.appendChild(cell);
     }
   }
-  document.getElementById('g1sum').textContent = 'Sum: ' + g1Sum();
+  const sum = g1Sum();
+  document.getElementById('g1sum').textContent = 'Sum: ' + sum;
+  document.getElementById('g1best').style.display = sum===g1.optimalValue ? '' : 'none';
 }
 function g1ClickCell(r,c){
   if(g1.locked) return;
@@ -732,7 +744,7 @@ function g1Lock(){
   if(g1.locked) return;
   g1.locked = true;
   const score = g1Sum();
-  const optimal = g1Optimal();
+  const optimal = g1.optimalValue;
   document.getElementById('g1lock').disabled = true;
   const banner = document.getElementById('g1banner');
   banner.classList.add('show');
